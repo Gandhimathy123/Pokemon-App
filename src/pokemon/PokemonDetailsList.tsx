@@ -5,46 +5,33 @@ import {
   SelectionMode,
   TooltipHost,
   Selection,
-  getTheme,
-  IDetailsRowStyles,
-  IDetailsListProps,
-  DetailsRow,
-  CommandBar,
-  TextField,
-  Label,
 } from "@fluentui/react";
 import axios from "axios";
 import React, { useCallback, useEffect, useState } from "react";
 import { AttributeType, DataStructureType, TableRow } from "../utils";
 import PokemonFilter from "./PokemonFilter";
 
-const theme = getTheme();
-
-interface PokemonState {
-  name: string;
-  experience: number;
+interface PokemonListProps {
+  type: string;
 }
 
 const PokemonDetailsList = () => {
   const [listData, setListData] = useState<TableRow[]>([]);
-  const [pokemonList, setPokemonList] = useState<PokemonState[]>([]);
-  const [searchValue, setSearchValue] = useState("");
-  const [experienceSelected, setExperienceSelected] = useState<number>(0);
+  const [pokemonList, setPokemonList] = useState<string[]>([]);
   const [typeSelected, setTypeSelected] = useState("");
-
   const [columns, setColumns] = useState<IColumn[]>([
     {
       key: "key1",
       name: "Persona",
       fieldName: "persona",
       minWidth: 150,
-      maxWidth: 200,
+      maxWidth: 170,
       onRender: (item: TableRow) => (
         <TooltipHost content={item.name}>
           <img
             src={item.icon}
             style={{ height: "100%", width: "50%" }}
-            alt={`${item.name} icon`}
+            alt={`${item.icon} file icon`}
           />
         </TooltipHost>
       ),
@@ -53,8 +40,8 @@ const PokemonDetailsList = () => {
       key: "key2",
       name: "Name",
       fieldName: "name",
-      minWidth: 90,
-      maxWidth: 100,
+      minWidth: 70,
+      maxWidth: 90,
       isPadded: true,
       data: "string",
       sortAscendingAriaLabel: "Sorted A to Z",
@@ -69,7 +56,7 @@ const PokemonDetailsList = () => {
       name: "Height",
       fieldName: "height",
       minWidth: 70,
-      maxWidth: 100,
+      maxWidth: 90,
       isPadded: true,
       data: "number",
       onColumnClick: (ev, column) => onColumnClick(column),
@@ -81,7 +68,7 @@ const PokemonDetailsList = () => {
       fieldName: "weight",
       minWidth: 70,
       data: "number",
-      maxWidth: 100,
+      maxWidth: 90,
       isPadded: true,
       onColumnClick: (ev, column) => onColumnClick(column),
       onRender: (item: TableRow) => item.weight,
@@ -91,7 +78,7 @@ const PokemonDetailsList = () => {
       name: "Experience",
       fieldName: "experience",
       minWidth: 70,
-      maxWidth: 100,
+      maxWidth: 90,
       isPadded: true,
       data: "number",
       onColumnClick: (ev, column) => onColumnClick(column),
@@ -101,17 +88,17 @@ const PokemonDetailsList = () => {
       key: "key6",
       name: "Type",
       fieldName: "type",
-      minWidth: 100,
-      maxWidth: 130,
+      minWidth: 70,
+      maxWidth: 90,
       isPadded: true,
-      onRender: (item: TableRow) => item.type.toString(),
+      onRender: (item: TableRow) => item.type,
     },
     {
       key: "key7",
       name: "Ability",
       fieldName: "ability",
-      minWidth: 100,
-      maxWidth: 150,
+      minWidth: 70,
+      maxWidth: 90,
       isPadded: true,
       onRender: (item: TableRow) => (
         <TooltipHost content={item.name}>
@@ -138,6 +125,7 @@ const PokemonDetailsList = () => {
       }
       return 0;
     });
+    console.log(newItems);
     setListData(newItems);
 
     const updatedColumns = columns.map((col) => {
@@ -155,18 +143,107 @@ const PokemonDetailsList = () => {
   }, []);
 
   useEffect(() => {
-    searchValue
-      ? getPokemonDetails(searchValue.toLowerCase(), 0, true)
-      : getPokemonList();
-    console.log(searchValue);
-  }, [searchValue]);
+    getPokemonList(typeSelected);
+    // setListData(lists);
+    console.log(typeSelected);
+  }, [typeSelected]);
 
   const covertToUppercase = (item: string) => {
-    return item?.[0].toUpperCase() + item?.slice(1);
+    return item[0].toUpperCase() + item.slice(1);
   };
 
+  // const getPokemonDetails = async (
+  //   listData: TableRow[],
+  //   name: string,
+  //   isSearch: boolean = false
+  // ) => {
+  //   try {
+  //     const response = await axios.get(
+  //       `${process.env.REACT_APP_API_URL}/pokemon/${name}`
+  //     );
+
+  //     if (response.data) {
+  //       // const data:any = [];
+  //       if (response.status === 200 && response.data) {
+  //         const dataDetail = isSearch ? [] : listData;
+  //         const alreadyInArray = dataDetail.some(
+  //           (item) => item.name === covertToUppercase(name)
+  //         );
+
+  //         if (!alreadyInArray) {
+  //           // const abilities: string[] = [];
+  //           // (response.data as any).abilities.forEach((element: any) => {
+  //           //   abilities.push(covertToUppercase(element.ability.name));
+  //           // });
+  //           const abilities = (response.data as any).abilities.map(
+  //             (element: any) => covertToUppercase(element.ability.name)
+  //           );
+  //           const typeName = (response.data as any).types[0].type;
+  //           const data = {
+  //             name: covertToUppercase((response.data as any).name),
+  //             key: (response.data as any).id,
+  //             icon: (response.data as any).sprites.front_default,
+  //             height: (response.data as any).height,
+  //             weight: (response.data as any).weight,
+  //             abilities: abilities,
+  //             experience: (response.data as any).base_experience,
+  //             type: typeName.name,
+  //           };
+
+  //           return data;
+  //           // setListData(dataDetail);
+  //         }
+  //       } else {
+  //         return null;
+  //         console.log("else data");
+  //       }
+  //       //   console.log(data,"consoled")
+  //       // return data;
+  //     }
+  //   } catch (error) {
+  //     console.log(error);
+  //     return null;
+  //   }
+  // };
+
+  // const getPokemonList = async (
+  //   listData: TableRow[],
+  //   typeName: string = ""
+  // ) => {
+  //   try {
+  //     const response = await axios.get<Array<Object>>(
+  //       typeName !== ""
+  //         ? `${process.env.REACT_APP_API_URL}/type/${typeName}? `
+  //         : `${process.env.REACT_APP_API_URL}/pokemon?limit=5&&offset=0`
+  //     );
+
+  //     if (response.data) {
+  //       console.log(typeName, response.data);
+  //       if (typeName === "") {
+  //         const value = response.data as any;
+  //         const newData = value.results.map((element: AttributeType) => {
+  //           console.log(element.name);
+  //           return getPokemonDetails(listData, element.name);
+  //         });
+  //         const newDatas = await Promise.all(newData);
+  //         console.log(newDatas)
+  //         setListData(newDatas);
+  //       } else {
+  //         const value = response.data as any;
+  //         value.pokemon.map((element: any) => {
+  //           getPokemonDetails(listData, element.pokemon.name);
+  //         });
+  //        console.log(value)
+  //       }
+  //     } else return null;
+  //   } catch (error) {
+  //     console.error(error);
+  //     return null; // or handle the error appropriately
+  //   }
+  // };
+
   const getPokemonDetails = useCallback(
-    async (name: string, exp: number = 0, isSearch: boolean = false) => {
+    async (name: string, isSearch: boolean = false) => {
       Promise.resolve(
         axios.get<Array<Object>>(
           `${process.env.REACT_APP_API_URL}/pokemon/${name}`
@@ -181,36 +258,30 @@ const PokemonDetailsList = () => {
             );
 
             if (!alreadyInArray) {
-              if (
-                (exp === 100 &&
-                  (response.data as any).base_experience <= 100) ||
-                (exp !== 100 && (response.data as any).base_experience > exp)
-              ) {
-                const abilities = (response.data as any).abilities.map(
-                  (element: any) => covertToUppercase(element.ability.name)
-                );
-                const typeName = (response.data as any).types.map(
-                  (element: any) => element.type.name
-                );
-                const data = {
-                  name: covertToUppercase((response.data as any).name),
-                  key: (response.data as any).id,
-                  icon: (response.data as any).sprites.front_default,
-                  height: (response.data as any).height,
-                  weight: (response.data as any).weight,
-                  abilities: abilities,
-                  experience: (response.data as any).base_experience ?? 0,
-                  type: typeName,
-                };
+              const abilities = (response.data as any).abilities.map(
+                (element: any) => covertToUppercase(element.ability.name)
+              );
+              const typeName = (response.data as any).types[0].type.name;
+              const data = {
+                name: covertToUppercase((response.data as any).name),
+                key: (response.data as any).id,
+                icon: (response.data as any).sprites.front_default,
+                height: (response.data as any).height,
+                weight: (response.data as any).weight,
+                abilities: abilities,
+                experience: (response.data as any).base_experience,
+                type: typeName,
+              };
 
-                dataDetail.push(data);
-                console.log(dataDetail);
-                setListData(dataDetail);
-              }
+              dataDetail.push(data);
+              console.log(dataDetail);
+              // setListData(dataDetail);
             }
           } else {
             console.log("else data");
           }
+          //   console.log(data,"consoled")
+          // return data;
         })
         .catch((error) => {
           console.log(error);
@@ -221,45 +292,34 @@ const PokemonDetailsList = () => {
   );
 
   const getPokemonList = useCallback(
-    async (typeName: string = "", exp: number = 0) => {
+    async (typeName: string = "") => {
       Promise.resolve(
         axios.get<Array<Object>>(
           typeName !== ""
-            ? `${process.env.REACT_APP_API_URL}/type/${typeName} `
+            ? `${process.env.REACT_APP_API_URL}/type/${typeName}? `
             : `${process.env.REACT_APP_API_URL}/pokemon?limit=5&&offset=0`
         )
       )
         .then((response) => {
-          console.log(typeName);
           if (response.data) {
-            setListData([]);
-            setPokemonList([]);
             if (typeName === "") {
               const value = response.data as unknown as DataStructureType;
               console.log();
-              const list = value.results.map((element: any) => {
-                return {
-                  name: covertToUppercase(element.name),
-                  experience: 0,
-                };
-              });
+              const list = value.results.map((element: any) =>
+                covertToUppercase(element.name)
+              );
               if (list !== pokemonList) setPokemonList(list);
 
               value.results.forEach((element) => {
-                getPokemonDetails((element as any).name, exp);
+                getPokemonDetails((element as any).name);
                 //   detailList.push(detailsData);
               });
             } else {
               const value = response.data as any;
-              const list = value.pokemon.map((element: any) => {
-                return {
-                  name: covertToUppercase(element.name),
-                  experience: 0,
-                };
-              });
-              setPokemonList(list);
+              setListData([]);
+              setPokemonList([]);
               value.pokemon.map((element: any) => {
-                getPokemonDetails(element.pokemon.name, exp);
+                getPokemonDetails(element.pokemon.name);
               });
               console.log(value);
             }
@@ -279,78 +339,24 @@ const PokemonDetailsList = () => {
     },
   });
 
-  const _onRenderRow: IDetailsListProps["onRenderRow"] = (props) => {
-    const customStyles: Partial<IDetailsRowStyles> = {};
-    if (props) {
-      if (props.itemIndex % 2 === 0) {
-        // Every other row renders with a different background color
-        customStyles.root = { backgroundColor: theme.palette.themeLighterAlt };
-      }
-
-      return <DetailsRow {...props} styles={customStyles} />;
-    }
-    return null;
-  };
-  const onSearchValueChange = (event: any, newValue?: string) => {
-    setSearchValue(newValue ?? "");
-  };
-  const OnTypeSelected = (type: string) => {
-    setTypeSelected(type);
-    getPokemonList(type, experienceSelected);
-  };
-
-  const onExpChange = (value: number) => {
-    setExperienceSelected(value);
-    getPokemonList(typeSelected, value);
-  };
-  
-  const onRowClick = (item: TableRow) => {
-    console.log(item)
-    alert(`You clicked on ${item.name}`);
+  const _onItemInvoked = (item: any): void => {
+    alert(`Item invoked: ${item.name}`);
   };
 
   return (
     <div>
-      <div style={{display:"flex",justifyContent:"space-between"}}>
-        <PokemonFilter
-          changeType={OnTypeSelected}
-          selectedType={typeSelected}
-          onExpChange={onExpChange}
-          experience={experienceSelected}
+      <div style={{ height: "100%" }}>
+        <PokemonFilter changeType={setTypeSelected} />
+        <DetailsList
+          items={listData}
+          compact={false}
+          columns={columns}
+          selectionMode={SelectionMode.multiple}
+          isHeaderVisible={true}
+          // onItemInvoked={_onItemInvoked}
+          setKey="single"
+          // selection={_selection}
         />
-        <div style={{ height: "100%", margin: "2rem 2rem 0px 350px",width:'75vw' }}>
-          <CommandBar
-            items={[]}
-            farItems={[
-              {
-                key: "searchBox",
-                onRender: () => (
-                  <>
-                    <Label htmlFor="searchId">Search</Label>
-                    <TextField
-                      id="searchId"
-                      placeholder="Search by name..."
-                      value={searchValue}
-                      onChange={onSearchValueChange}
-                      styles={{ root: { width: 300, paddingLeft: "10px" } }} // Adjust width as needed
-                    />
-                  </>
-                ),
-              },
-            ]}
-          />
-          <DetailsList
-            className="detailsListClass"
-            items={listData}
-            compact={false}
-            columns={columns}
-            selectionMode={SelectionMode.multiple}
-            isHeaderVisible={true}
-            onRenderRow={_onRenderRow}
-            onItemInvoked={onRowClick}
-            setKey="single"
-          />
-        </div>
       </div>
     </div>
   );
