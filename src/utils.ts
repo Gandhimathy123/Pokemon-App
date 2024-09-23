@@ -5,8 +5,8 @@ export interface TableRow {
   height: number;
   weight: number;
   abilities: Array<string>;
-  experience: string;
-  type: string;
+  experience: number;
+  type: Array<string>;
 }
 
 export interface DataStructureType {

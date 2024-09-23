@@ -11,18 +11,7 @@ const PokemonDetails = () => {
 
   return (
     <div>
-      <Panel
-        headerText="Sample panel"
-        isOpen={openPanel}
-        onDismiss={()=>setOpenPanel(false)}
-        closeButtonAriaLabel="Close"
-      >
-        <PokemonDetailsPanel/>
-      </Panel>
       <PokemonDetailsList/>
-      <DefaultButton text="Open panel" onClick={()=>setOpenPanel(true)} />
-      
-        
     </div>
   )
 }
