@@ -12,8 +12,8 @@ const Alert: React.FC<AlertProps> = ({ data, onClose }) => {
     return (
         <div className="alert">
             {data && <>
-            <h3 className='centerClass'>Pokemon</h3>
-            <p> Pokemon <strong>{data.name} :</strong> has abilities: {data.value} .</p>
+            <h3 >{data.name}</h3>
+            <p> {data.value} .</p>
             </>}
            <PrimaryButton className='closebtn' onClick={onClose}> Close</PrimaryButton>
         </div>

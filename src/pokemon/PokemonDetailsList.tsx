@@ -11,12 +11,14 @@ import {
   TextField,
   Label,
   SearchBox,
+  PrimaryButton,
 } from "@fluentui/react";
 import axios from "axios";
 import { useCallback, useEffect, useState } from "react";
 import { AttributeType, DataStructureType, TableRow } from "../utils";
 import PokemonFilter from "./PokemonFilter";
 import Alert from "../Alert.component";
+import PokemonImage from '../images/pokemon.png'
 
 const theme = getTheme();
 
@@ -28,6 +30,7 @@ const PokemonDetailsList = () => {
   const [typeSelected, setTypeSelected] = useState("");
   const [showAlert, setShowAlert] = useState(false);
   const [alertData, setAlertData] = useState<AttributeType>();
+  const [comment, setComment] = useState('');
 
   const [columns, setColumns] = useState<IColumn[]>([
     {
@@ -157,7 +160,6 @@ const PokemonDetailsList = () => {
     searchValue
       ? getPokemonDetails(searchValue.toLowerCase(), 0, true)
       : getPokemonList();
-    console.log(searchValue);
   }, [searchValue]);
 
   const covertToUppercase = (item: string) => {
@@ -291,14 +293,24 @@ const PokemonDetailsList = () => {
     if (item) {
       setAlertData({
         name: item.name,
-        value: item.abilities.toString(),
+        value: `Pokemon ${item.name} has abilities ${item.abilities.toString()}`,
       });
       handleShowAlert();
     }
   };
+  const submitComment = ()=>{
+    setAlertData({
+      name: "Thank you for your comment",
+      value: `Your comment ${comment} has been noted`,
+    });
+    handleShowAlert();
+  }
 
   const handleShowAlert = () => setShowAlert(true);
-  const handleCloseAlert = () => setShowAlert(false);
+  const handleCloseAlert = () => {
+    setComment("");
+    setShowAlert(false);
+  };
 
   return (
     <>
@@ -318,7 +330,9 @@ const PokemonDetailsList = () => {
               width: "75vw",
             }}
           >
-            <h1 className="TableHeading">Pokemon Table</h1>
+           <div style={{display:"flex",alignItems:'center'}}> <h1 className="TableHeading">Pokemon List  </h1>
+           <img src={PokemonImage} alt="pokemon" style={{ width: '50px', height: 'auto' }} /> 
+           </div>
             <CommandBar
               items={[]}
               farItems={[
@@ -355,10 +369,13 @@ const PokemonDetailsList = () => {
           </div>
         </div>
         <div className="paddingClass">
+          <div>
           <Label htmlFor="commentId">
             Please provide your feedback on Pokemon Table
           </Label>
-          <TextField id="commentId" multiline rows={3} />
+          <TextField id="commentId" value={comment} multiline rows={3} onChange={(e)=>setComment(e.currentTarget.value)}/>
+          </div>
+          <PrimaryButton onClick={submitComment}>Submit</PrimaryButton>
         </div>
       </div>
     </>
