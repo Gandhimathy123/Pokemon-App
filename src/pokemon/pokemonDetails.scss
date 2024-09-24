@@ -2,7 +2,7 @@
     width: 100%;
     border: #edebe9 1px solid;
     border-radius: 5px;
-    margin-top: 2rem;
+    // height: 75vh;
 }
 
 .checkBoxClass{
@@ -18,10 +18,40 @@
     padding: 20px;
     height: 100vh;
     position: fixed;
-    .filterHeader{
-        // display: flex;
-        // justify-content: center;
-        color: #605e5c;
-        margin: 30px 0px 40px 0px;
+    margin-bottom: 40px;
+    .filterHeaderDiv{
+        display: flex;
+        color: #474645;
+        .filterIcon{
+            margin-top: 22px;
+            padding-right: 5px;
+            font-size: large;
+            font-weight: 600;
+            line-height: 1.7;
+        }
+    }
+    
+    .clearFilter{
+        padding: 20px 10px;
+        color: darkcyan;
+        cursor: pointer;
+        i{
+            padding-right: 10px;
+        }
+    }
+}
+.TableHeading{
+    display: flex;
+    justify-content: space-between;
+    color: #514c4c;
+}
+.paddingClass{
+    padding: 20px;
+    width: 300px;
+    left: 350px;
+    position: absolute;
+    button{
+        margin-top: 20px;
+        height: 30px;
     }
 }

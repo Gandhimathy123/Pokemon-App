@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { getPokemonList, getPokemonTypes } from "./usePokemonApis";
-import { Checkbox, CommandBar, Label, TextField } from "@fluentui/react";
+import {  getPokemonTypes } from "./usePokemonApis";
+import { Checkbox, Icon, Label} from "@fluentui/react";
 
 interface PokemonFilterProps {
   changeType: (type: string) => void;
@@ -11,12 +11,10 @@ interface PokemonFilterProps {
 
 const PokemonFilter = ({ changeType,selectedType,onExpChange,experience }: PokemonFilterProps) => {
   const [typeNames, setTypeNames] = useState<Array<string>>([]);
-  const [showFilter, setshowFilter] = useState(false);
 
   const fetchTypes = async () => {
     const types = await getPokemonTypes();
     setTypeNames(types!!.slice(8, 15));
-    console.log(types);
   };
 
 
@@ -26,7 +24,7 @@ const PokemonFilter = ({ changeType,selectedType,onExpChange,experience }: Pokem
 
   return (
     <div className="filterCard">
-        <h2 className="filterHeader">Filter</h2>
+        <div className="filterHeaderDiv"><Icon className="filterIcon" iconName="Filter" /><h2>Filter</h2></div>
           <div>
             <Label htmlFor="typesCheckbox">By type</Label>
             <div id="typesCheckbox">
@@ -37,10 +35,8 @@ const PokemonFilter = ({ changeType,selectedType,onExpChange,experience }: Pokem
                   label={type}
                   checked={selectedType === type}
                   onChange={(event, checked) => {
-                    console.log(type);
                     if (checked) {
                       changeType(type);
-                      console.log(type);
                     } else {
                       changeType("");
                     }
@@ -82,6 +78,12 @@ const PokemonFilter = ({ changeType,selectedType,onExpChange,experience }: Pokem
                 styles={{ root: { marginRight: 10 } }}
               />
             </div>
+          </div>
+          <div className="clearFilter" onClick={()=>{
+            changeType('');onExpChange(0);
+          }}>
+            <Icon iconName= 'ClearFilter' title="Clear All" /> 
+            Clear All
           </div>
     </div>
   );
