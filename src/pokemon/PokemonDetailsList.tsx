@@ -1,10 +1,8 @@
 import {
   DetailsList,
-  DetailsListLayoutMode,
   IColumn,
   SelectionMode,
   TooltipHost,
-  Selection,
   getTheme,
   IDetailsRowStyles,
   IDetailsListProps,
@@ -12,25 +10,24 @@ import {
   CommandBar,
   TextField,
   Label,
+  SearchBox,
 } from "@fluentui/react";
 import axios from "axios";
-import React, { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { AttributeType, DataStructureType, TableRow } from "../utils";
 import PokemonFilter from "./PokemonFilter";
+import Alert from "../Alert.component";
 
 const theme = getTheme();
 
-interface PokemonState {
-  name: string;
-  experience: number;
-}
-
 const PokemonDetailsList = () => {
   const [listData, setListData] = useState<TableRow[]>([]);
-  const [pokemonList, setPokemonList] = useState<PokemonState[]>([]);
+  const [pokemonList, setPokemonList] = useState<string[]>([]);
   const [searchValue, setSearchValue] = useState("");
   const [experienceSelected, setExperienceSelected] = useState<number>(0);
   const [typeSelected, setTypeSelected] = useState("");
+  const [showAlert, setShowAlert] = useState(false);
+  const [alertData, setAlertData] = useState<AttributeType>();
 
   const [columns, setColumns] = useState<IColumn[]>([
     {
@@ -38,12 +35,12 @@ const PokemonDetailsList = () => {
       name: "Persona",
       fieldName: "persona",
       minWidth: 150,
-      maxWidth: 200,
+      maxWidth: 150,
       onRender: (item: TableRow) => (
         <TooltipHost content={item.name}>
           <img
             src={item.icon}
-            style={{ height: "100%", width: "50%" }}
+            style={{ width: "50px" }}
             alt={`${item.name} icon`}
           />
         </TooltipHost>
@@ -61,7 +58,9 @@ const PokemonDetailsList = () => {
       sortDescendingAriaLabel: "Sorted Z to A",
       onColumnClick: (ev, column) => onColumnClick(column),
       onRender: (item: TableRow) => (
-        <TooltipHost content={item.name}>{item.name}</TooltipHost>
+        <div style={{ cursor: "pointer" }} onClick={() => onRowClick(item)}>
+          <TooltipHost content={item.name}>{item.name}</TooltipHost>
+        </div>
       ),
     },
     {
@@ -204,7 +203,6 @@ const PokemonDetailsList = () => {
                 };
 
                 dataDetail.push(data);
-                console.log(dataDetail);
                 setListData(dataDetail);
               }
             }
@@ -226,22 +224,17 @@ const PokemonDetailsList = () => {
         axios.get<Array<Object>>(
           typeName !== ""
             ? `${process.env.REACT_APP_API_URL}/type/${typeName} `
-            : `${process.env.REACT_APP_API_URL}/pokemon?limit=5&&offset=0`
+            : `${process.env.REACT_APP_API_URL}/pokemon?limit=500&&offset=0`
         )
       )
         .then((response) => {
-          console.log(typeName);
           if (response.data) {
             setListData([]);
             setPokemonList([]);
             if (typeName === "") {
               const value = response.data as unknown as DataStructureType;
-              console.log();
               const list = value.results.map((element: any) => {
-                return {
-                  name: covertToUppercase(element.name),
-                  experience: 0,
-                };
+                return  covertToUppercase(element.name)
               });
               if (list !== pokemonList) setPokemonList(list);
 
@@ -252,16 +245,12 @@ const PokemonDetailsList = () => {
             } else {
               const value = response.data as any;
               const list = value.pokemon.map((element: any) => {
-                return {
-                  name: covertToUppercase(element.name),
-                  experience: 0,
-                };
+                return covertToUppercase(element.name)
               });
               setPokemonList(list);
               value.pokemon.map((element: any) => {
                 getPokemonDetails(element.pokemon.name, exp);
               });
-              console.log(value);
             }
           }
         })
@@ -271,13 +260,6 @@ const PokemonDetailsList = () => {
     },
     [pokemonList]
   );
-
-  const _selection = new Selection({
-    onSelectionChanged: () => {
-      let newSelectedItem = _selection.getSelection();
-      console.log(newSelectedItem);
-    },
-  });
 
   const _onRenderRow: IDetailsListProps["onRenderRow"] = (props) => {
     const customStyles: Partial<IDetailsRowStyles> = {};
@@ -291,7 +273,8 @@ const PokemonDetailsList = () => {
     }
     return null;
   };
-  const onSearchValueChange = (event: any, newValue?: string) => {
+
+  const onSearchValueChange = (newValue: string) => {
     setSearchValue(newValue ?? "");
   };
   const OnTypeSelected = (type: string) => {
@@ -303,56 +286,82 @@ const PokemonDetailsList = () => {
     setExperienceSelected(value);
     getPokemonList(typeSelected, value);
   };
-  
+
   const onRowClick = (item: TableRow) => {
-    console.log(item)
-    alert(`You clicked on ${item.name}`);
+    if (item) {
+      setAlertData({
+        name: item.name,
+        value: item.abilities.toString(),
+      });
+      handleShowAlert();
+    }
   };
 
+  const handleShowAlert = () => setShowAlert(true);
+  const handleCloseAlert = () => setShowAlert(false);
+
   return (
-    <div>
-      <div style={{display:"flex",justifyContent:"space-between"}}>
-        <PokemonFilter
-          changeType={OnTypeSelected}
-          selectedType={typeSelected}
-          onExpChange={onExpChange}
-          experience={experienceSelected}
-        />
-        <div style={{ height: "100%", margin: "2rem 2rem 0px 350px",width:'75vw' }}>
-          <CommandBar
-            items={[]}
-            farItems={[
-              {
-                key: "searchBox",
-                onRender: () => (
-                  <>
-                    <Label htmlFor="searchId">Search</Label>
-                    <TextField
-                      id="searchId"
-                      placeholder="Search by name..."
-                      value={searchValue}
-                      onChange={onSearchValueChange}
-                      styles={{ root: { width: 300, paddingLeft: "10px" } }} // Adjust width as needed
-                    />
-                  </>
-                ),
-              },
-            ]}
+    <>
+      {showAlert && <Alert data={alertData} onClose={handleCloseAlert} />}
+      <div>
+        <div style={{ display: "flex", justifyContent: "space-between" }}>
+          <PokemonFilter
+            changeType={OnTypeSelected}
+            selectedType={typeSelected}
+            onExpChange={onExpChange}
+            experience={experienceSelected}
           />
-          <DetailsList
-            className="detailsListClass"
-            items={listData}
-            compact={false}
-            columns={columns}
-            selectionMode={SelectionMode.multiple}
-            isHeaderVisible={true}
-            onRenderRow={_onRenderRow}
-            onItemInvoked={onRowClick}
-            setKey="single"
-          />
+          <div
+            style={{
+              height: "100%",
+              marginLeft: "350px",
+              width: "75vw",
+            }}
+          >
+            <h1 className="TableHeading">Pokemon Table</h1>
+            <CommandBar
+              items={[]}
+              farItems={[
+                {
+                  key: "searchBox",
+                  onRender: () => (
+                    <>
+                      {/* <Label htmlFor="searchId">Search</Label> */}
+                      <SearchBox
+                        styles={{ root: { width: 300, paddingLeft: "10px" } }}
+                        placeholder="Search by name..."
+                        onClear={(ev) => {
+                          console.log("Custom onClear Called");
+                          setSearchValue("");
+                        }}
+                        onSearch={onSearchValueChange}
+                      />
+                    </>
+                  ),
+                },
+              ]}
+            />
+            <DetailsList
+              className="detailsListClass"
+              items={listData}
+              compact={false}
+              columns={columns}
+              selectionMode={SelectionMode.none}
+              isHeaderVisible={true}
+              onRenderRow={_onRenderRow}
+              onItemInvoked={onRowClick}
+              setKey="single"
+            />
+          </div>
+        </div>
+        <div className="paddingClass">
+          <Label htmlFor="commentId">
+            Please provide your feedback on Pokemon Table
+          </Label>
+          <TextField id="commentId" multiline rows={3} />
         </div>
       </div>
-    </div>
+    </>
   );
 };
 
