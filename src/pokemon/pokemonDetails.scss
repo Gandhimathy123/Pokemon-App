@@ -55,3 +55,11 @@
         height: 30px;
     }
 }
+
+.flexClass{
+    display: flex;
+    i{
+        padding: 10px;
+        cursor: pointer;
+    }
+}

@@ -27,7 +27,7 @@ const PokemonDetailsList = () => {
   const [pokemonList, setPokemonList] = useState<string[]>([]);
   const [searchValue, setSearchValue] = useState("");
   const [experienceSelected, setExperienceSelected] = useState<number>(0);
-  const [typeSelected, setTypeSelected] = useState("");
+  const [typeSelected, setTypeSelected] = useState<string[]>([]);
   const [showAlert, setShowAlert] = useState(false);
   const [alertData, setAlertData] = useState<AttributeType>();
   const [comment, setComment] = useState('');
@@ -153,13 +153,20 @@ const PokemonDetailsList = () => {
   };
 
   useEffect(() => {
+    setListData([]);
+    setPokemonList([]);
     getPokemonList();
   }, []);
 
   useEffect(() => {
-    searchValue
-      ? getPokemonDetails(searchValue.toLowerCase(), 0, true)
-      : getPokemonList();
+    if(searchValue){
+      getPokemonDetails(searchValue.toLowerCase(), 0, true)
+    }
+     else{
+      setListData([]);
+      setPokemonList([]);
+      getPokemonList();
+     } 
   }, [searchValue]);
 
   const covertToUppercase = (item: string) => {
@@ -226,23 +233,19 @@ const PokemonDetailsList = () => {
         axios.get<Array<Object>>(
           typeName !== ""
             ? `${process.env.REACT_APP_API_URL}/type/${typeName} `
-            : `${process.env.REACT_APP_API_URL}/pokemon?limit=500&&offset=0`
+            : `${process.env.REACT_APP_API_URL}/pokemon?limit=10&&offset=0`
         )
       )
         .then((response) => {
           if (response.data) {
-            setListData([]);
-            setPokemonList([]);
             if (typeName === "") {
               const value = response.data as unknown as DataStructureType;
               const list = value.results.map((element: any) => {
                 return  covertToUppercase(element.name)
               });
               if (list !== pokemonList) setPokemonList(list);
-
               value.results.forEach((element) => {
                 getPokemonDetails((element as any).name, exp);
-                //   detailList.push(detailsData);
               });
             } else {
               const value = response.data as any;
@@ -278,15 +281,29 @@ const PokemonDetailsList = () => {
 
   const onSearchValueChange = (newValue: string) => {
     setSearchValue(newValue ?? "");
+    setTypeSelected([]);
+    setExperienceSelected(0);
   };
-  const OnTypeSelected = (type: string) => {
-    setTypeSelected(type);
-    getPokemonList(type, experienceSelected);
+  const OnTypeSelected = (types: string[]) => {
+    setTypeSelected(types);
+    setListData([]);
+    setPokemonList([]);
+    if(!types.length){
+      getPokemonList('', experienceSelected);
+    }else{
+      types.forEach(type => {
+        getPokemonList(type, experienceSelected); 
+      });
+    }
   };
 
   const onExpChange = (value: number) => {
     setExperienceSelected(value);
-    getPokemonList(typeSelected, value);
+    setListData([]);
+    setPokemonList([]);
+    typeSelected.forEach(type => {
+      getPokemonList(type, value); 
+    });
   };
 
   const onRowClick = (item: TableRow) => {
@@ -318,7 +335,7 @@ const PokemonDetailsList = () => {
       <div>
         <div style={{ display: "flex", justifyContent: "space-between" }}>
           <PokemonFilter
-            changeType={OnTypeSelected}
+            AddType={OnTypeSelected}
             selectedType={typeSelected}
             onExpChange={onExpChange}
             experience={experienceSelected}
@@ -345,7 +362,6 @@ const PokemonDetailsList = () => {
                         styles={{ root: { width: 300, paddingLeft: "10px" } }}
                         placeholder="Search by name..."
                         onClear={(ev) => {
-                          console.log("Custom onClear Called");
                           setSearchValue("");
                         }}
                         onSearch={onSearchValueChange}
