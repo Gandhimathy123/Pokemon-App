@@ -233,7 +233,7 @@ const PokemonDetailsList = () => {
         axios.get<Array<Object>>(
           typeName !== ""
             ? `${process.env.REACT_APP_API_URL}/type/${typeName} `
-            : `${process.env.REACT_APP_API_URL}/pokemon?limit=10&&offset=0`
+            : `${process.env.REACT_APP_API_URL}/pokemon?limit=200&&offset=0`
         )
       )
         .then((response) => {
@@ -301,9 +301,13 @@ const PokemonDetailsList = () => {
     setExperienceSelected(value);
     setListData([]);
     setPokemonList([]);
-    typeSelected.forEach(type => {
-      getPokemonList(type, value); 
-    });
+    if(!typeSelected.length){
+       getPokemonList('', value);
+    }else{
+      typeSelected.forEach(type => {
+        getPokemonList(type, value); 
+      });
+    }
   };
 
   const onRowClick = (item: TableRow) => {
