@@ -30,5 +30,5 @@ export interface SortOption {
 
 export interface AttributeType {
   name: string;
-  url: string;
+  value: string;
 }
